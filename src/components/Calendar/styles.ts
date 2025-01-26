@@ -4,47 +4,72 @@ export const CalendarContainer = styled.div`
   width: 100%;
   height: 100vh;
   padding: 0;
-  background: #ffffff;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
 export const CalendarHeader = styled.div`
+  background: #ff9800;
+  padding: 12px 16px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+`;
+
+export const AppTitle = styled.div`
+  color: white;
+  font-size: 18px;
+  font-weight: 500;
+`;
+
+export const ControlsRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  background: #ff9800;
-  color: white;
+  padding: 8px 16px;
+  background: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
 `;
 
 export const MonthNavigation = styled.div`
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 2px;
+`;
+
+export const ViewControls = styled.div`
+  display: flex;
+  gap: 4px;
 `;
 
 export const NavButton = styled.button`
-  background: transparent;
+  width: 28px;
+  height: 28px; 
   border: none;
-  color: white;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0.5rem;
+  border-radius: 4px;
+  padding: 1px 0;
+  background: lightgrey;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  transform: rotate(90deg);
+  color: #666;
+  cursor: pointer;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.05);
+  }
+  &:focus {
+    outline: none;
   }
 `;
 
 export const CurrentMonth = styled.h2`
   margin: 0;
-  font-size: 1.5rem;
-  font-weight: 500;
-  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  color: #666;
 `;
 
 export const WeekDaysGrid = styled.div`
@@ -76,6 +101,8 @@ export const DayCell = styled.div<{ isSelected: boolean; isCurrentMonth: boolean
   padding: 0.5rem;
   position: relative;
   cursor: pointer;
+   user-select: none;
+  outline: none;
   opacity: ${({ isCurrentMonth }) => isCurrentMonth ? 1 : 0.5};
   
   ${({ isSelected }) => isSelected && `
@@ -101,11 +128,18 @@ export const DayNumber = styled.div`
   gap: 4px;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
+  font-weight: 700;
   color: #666;
 `;
 
-export const AddButton = styled.button<{ isVisible: boolean }>`
-  display: ${({ isVisible }) => isVisible ? 'inline-flex' : 'none'};
+export const AddButton = styled.button<{ isVisible: boolean; date: string }>`
+display: ${({ isVisible, date }) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const buttonDate = new Date(date);
+  buttonDate.setHours(0, 0, 0, 0);
+  return isVisible && buttonDate >= today ? "flex" : "none"
+}};
   align-items: center;
   justify-content: center;
   background: none;
@@ -125,5 +159,30 @@ export const AddButton = styled.button<{ isVisible: boolean }>`
   }
   &:focus {
      outline: none;
+  }
+`;
+
+export const ViewToggleContainer = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+`;
+
+export const ViewToggleButton = styled.button<{ isActive: boolean }>`
+  padding: 4px 12px;
+  border: none;
+  background: ${({ isActive }) => isActive ? '#e0e0e0' : 'transparent'};
+  border-radius: 4px;
+  cursor: pointer;
+  color: #666;
+  font-size: 13px;
+  font-weight: 700;
+
+  &:hover {
+    background: ${({ isActive }) => isActive ? '#e0e0e0' : '#fff'};
+  }
+
+  &:focus {
+    outline: none;
   }
 `;

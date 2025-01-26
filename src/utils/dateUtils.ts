@@ -27,6 +27,31 @@ export const getCalendarDays = (date: moment.Moment) => {
   return days;
 };
 
+export const getWeekDays = (date: moment.Moment) => {
+  const weekStart = date.clone().startOf('week');
+  const weekEnd = date.clone().endOf('week');
+
+  const days: Array<{
+    date: moment.Moment;
+    isCurrentMonth: boolean;
+    isToday: boolean;
+    isSelected: boolean;
+  }> = [];
+
+  const day = weekStart.clone();
+  while (day.isSameOrBefore(weekEnd)) {
+    days.push({
+      date: day.clone(),
+      isCurrentMonth: day.isSame(date, 'month'),
+      isToday: day.isSame(moment(), 'day'),
+      isSelected: false
+    });
+    day.add(1, 'day');
+  }
+
+  return days;
+};
+
 export const formatDate = (date: moment.Moment, formatString: string = 'YYYY-MM-DD') => {
   return date.format(formatString);
 };

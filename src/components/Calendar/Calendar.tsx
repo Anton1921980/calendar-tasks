@@ -9,11 +9,18 @@ import {
   MonthNavigation,
   NavButton,
   CurrentMonth,
+  AppTitle,
+  ViewControls,
+  ViewToggleButton,
+  ControlsRow,
 } from './styles';
+
+
 
 export const Calendar: React.FC = () => {
   const dispatch = useDispatch();
   const [currentDate, setCurrentMoment] = React.useState(moment());
+  const [view, setView] = React.useState('month');
 
   const handleMonthChange = (delta: number) => {
     const newDate = currentDate.clone().add(delta, 'month');
@@ -24,15 +31,32 @@ export const Calendar: React.FC = () => {
   return (
     <CalendarContainer>
       <CalendarHeader>
+        <AppTitle>Calendar</AppTitle>
+      </CalendarHeader>
+      <ControlsRow>
         <MonthNavigation>
-          <NavButton onClick={() => handleMonthChange(-1)}>&lt;</NavButton>
-          <CurrentMonth>
+          <NavButton onClick={() => handleMonthChange(-1)}>&gt;</NavButton>         
+          <NavButton onClick={() => handleMonthChange(1)}>&lt;</NavButton>
+        </MonthNavigation>
+        <CurrentMonth>
             {currentDate.format('MMMM YYYY')}
           </CurrentMonth>
-          <NavButton onClick={() => handleMonthChange(1)}>&gt;</NavButton>
-        </MonthNavigation>
-      </CalendarHeader>
-      <CalendarGrid currentDate={currentDate} />
+        <ViewControls>
+          <ViewToggleButton 
+            isActive={view === 'week'} 
+            onClick={() => setView('week')}
+          >
+            Week
+          </ViewToggleButton>
+          <ViewToggleButton 
+            isActive={view === 'month'} 
+            onClick={() => setView('month')}
+          >
+            Month
+          </ViewToggleButton>
+        </ViewControls>
+      </ControlsRow>
+      <CalendarGrid currentDate={currentDate} view={view} />
     </CalendarContainer>
   );
 };

@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store";
 import { setSelectedDate } from "@/store/slices/calendarSlice";
 import { moveTask } from "@/store/slices/tasksSlice";
-import { getCalendarDays } from "@/utils/dateUtils";
+import { getCalendarDays, getWeekDays } from "@/utils/dateUtils";
 import {
   WeekDaysGrid,
   WeekDay,
@@ -27,11 +27,12 @@ const WEEKDAYS = [
 
 interface CalendarGridProps {
   currentDate: moment.Moment;
+  view: string;
 }
 
-export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentDate }) => {
+export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentDate, view }) => {
   
-  const [showInput, setShowInput] = useState(false);
+  const [showInput, setShowInput] = useState(false);  
   const dispatch = useDispatch();
  
   const selectedDate = useSelector(
@@ -39,7 +40,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentDate }) => {
   );
   const tasks = useSelector((state: RootState) => state.tasks);
 
-  const calendarDays = getCalendarDays(currentDate);
+  const calendarDays = view === 'month' ? getCalendarDays(currentDate) : getWeekDays(currentDate);
 
   const handleDateClick = (date: moment.Moment) => {
     dispatch(setSelectedDate(date.format("YYYY-MM-DD")));
@@ -64,7 +65,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentDate }) => {
   };
 
   return (
-    <>
+    <> 
       <WeekDaysGrid>
         {WEEKDAYS.map((day) => (
           <WeekDay key={day}>{day.slice(0, 3)}</WeekDay>
@@ -87,9 +88,17 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentDate }) => {
               onDrop={(e) => handleDrop(e, dateStr)}
             >
               <DayNumber className="day-number">
-                <div>{date.format("D")}</div>
+                <div>
+                  {date.format("D")}
+                  {dayTasks.length > 0 && (
+                    <span style={{ fontSize: '10px', fontWeight: 'normal', color: '#666', marginLeft: '10px' }}>
+                      {dayTasks.length} {dayTasks.length === 1 ? 'card' : 'cards'}
+                    </span>
+                  )}
+                </div>
                 <AddButton
                   isVisible={isSelected}
+                  date={dateStr}
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowInput(true);
@@ -102,7 +111,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentDate }) => {
                 date={dateStr}
                 tasks={dayTasks}
                 showInput={isSelected && showInput}
-               setShowInput={setShowInput}
+                setShowInput={setShowInput}
               />
             </DayCell>
           );

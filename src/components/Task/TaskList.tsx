@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import styled from "@emotion/styled";
+import React, { useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   Task,
@@ -10,90 +9,9 @@ import {
 import { TaskItem } from "./TaskItem";
 import { v4 as uuidv4 } from "uuid";
 import { RootState } from "@/store";
+import { AddButton } from "../Calendar/styles";
+import {TaskListContainer, TaskItemWrapper, AddTaskInput} from "./styles"
 
-const TaskListContainer = styled.div<{ isSelected: boolean }>`
-  margin-top: 0.5rem;
-  position: absolute;
-  top: 25px;
-  bottom: 5px;
-  left: 0;
-  right: 0;
-  overflow-y: auto;
-  padding: 0 4px;
-  scrollbar-width: thin;
-  scrollbar-color: #ff9800 #f1f1f1;
-
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #ff9800;
-    border-radius: 3px;
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background: #f57c00;
-  }
-`;
-
-const TaskItemWrapper = styled.div<{ isDraggingOver: boolean }>`
-  position: relative;
-  &:after {
-    content: "";
-    display: ${(props) => (props.isDraggingOver ? "block" : "none")};
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: #ff9800;
-    bottom: 0;
-  }
-`;
-
-const AddTaskInput = styled.input<{ isVisible: boolean }>`
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  margin-top: 0.5rem;
-  background: white;
-  display: ${({ isVisible }) => (isVisible ? "block" : "none")};
-
-  &:focus {
-    outline: none;
-    border-color: #ff9800;
-    color: #ff9800;
-  }
-`;
-
-const AddButton = styled.button<{ isVisible: boolean }>`
-  display: ${({ isVisible }) => (isVisible ? "flex" : "none")};
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: none;
-  color: #ff9800;
-  cursor: pointer;
-  padding: 4px;
-  margin-top: 0.5rem;
-  font-size: 20px;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-
-  &:hover {
-    background: rgba(255, 152, 0, 0.1);
-  }
-`;
 
 interface TaskListProps {
   date: string;
@@ -109,6 +27,7 @@ export const TaskList: React.FC<TaskListProps> = ({
   setShowInput,
 }) => {
   const dispatch = useDispatch();
+  const inputRef = useRef<HTMLInputElement>(null);
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dragOverTaskId, setDragOverTaskId] = useState<string | null>(null);
 
@@ -116,6 +35,12 @@ export const TaskList: React.FC<TaskListProps> = ({
     (state: RootState) => state.calendar.selectedDate
   );
   const isSelected = selectedDate === date;
+
+  useEffect(() => {
+    if (showInput && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [showInput]);
 
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     setDraggedTaskId(taskId);
@@ -210,12 +135,12 @@ export const TaskList: React.FC<TaskListProps> = ({
 
   return (
     <TaskListContainer isSelected={isSelected}>
-       <AddTaskInput
-        isVisible={isSelected && showInput}
-        placeholder="Add task..."
-        onKeyPress={handleAddTask}
-        onBlur={() => setShowInput(false)}
-        onClick={(e) => e.stopPropagation()}
+      <AddTaskInput
+        ref={inputRef}
+        isVisible={showInput}
+        date={date}
+        onKeyDown={handleAddTask}
+        placeholder="Add task and press Enter"
       />
       {[...tasks].reverse().map((task) => (
         <TaskItemWrapper
@@ -235,8 +160,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           />
         </TaskItemWrapper>
       ))}
-
-     
+      <AddButton isVisible={showInput} date={date} />
     </TaskListContainer>
   );
 };
