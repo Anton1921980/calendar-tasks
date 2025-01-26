@@ -28,9 +28,10 @@ const WEEKDAYS = [
 interface CalendarGridProps {
   currentDate: moment.Moment;
   view: string;
+  searchText: string;
 }
 
-export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentDate, view }) => {
+export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentDate, view, searchText }) => {
   
   const [showInput, setShowInput] = useState(false);  
   const dispatch = useDispatch();
@@ -108,10 +109,11 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentDate, view })
                 </AddButton>
               </DayNumber>
               <TaskList
-                date={dateStr}
-                tasks={dayTasks}
+                date={date.format("YYYY-MM-DD")}
+                tasks={tasks[date.format("YYYY-MM-DD")] || []}
                 showInput={isSelected && showInput}
                 setShowInput={setShowInput}
+                searchText={searchText}
               />
             </DayCell>
           );

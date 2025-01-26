@@ -13,6 +13,7 @@ import {
   ViewControls,
   ViewToggleButton,
   ControlsRow,
+  SearchInput,
 } from './styles';
 
 
@@ -21,6 +22,7 @@ export const Calendar: React.FC = () => {
   const dispatch = useDispatch();
   const [currentDate, setCurrentMoment] = React.useState(moment());
   const [view, setView] = React.useState('month');
+  const [searchText, setSearchText] = React.useState('');
 
   const handleMonthChange = (delta: number) => {
     const newDate = currentDate.clone().add(delta, 'month');
@@ -28,10 +30,20 @@ export const Calendar: React.FC = () => {
     dispatch(setCurrentDate(newDate.format('YYYY-MM-DD')));
   };
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchText(e.target.value);
+  };
+
   return (
     <CalendarContainer>
       <CalendarHeader>
         <AppTitle>Calendar</AppTitle>
+        <SearchInput
+          type="text"
+          placeholder="Search tasks..."
+          value={searchText}
+          onChange={handleSearchChange}
+        />
       </CalendarHeader>
       <ControlsRow>
         <MonthNavigation>
@@ -56,7 +68,7 @@ export const Calendar: React.FC = () => {
           </ViewToggleButton>
         </ViewControls>
       </ControlsRow>
-      <CalendarGrid currentDate={currentDate} view={view} />
+      <CalendarGrid currentDate={currentDate} view={view} searchText={searchText} />
     </CalendarContainer>
   );
 };

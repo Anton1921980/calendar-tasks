@@ -10,10 +10,13 @@ export const CalendarContainer = styled.div`
 `;
 
 export const CalendarHeader = styled.div`
+  display: flex;
+  justify-content: space-between;  
   background: #ff9800;
   padding: 12px 16px;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
+  user-select: none;
 `;
 
 export const AppTitle = styled.div`
@@ -29,6 +32,7 @@ export const ControlsRow = styled.div`
   padding: 8px 16px;
   background: #f5f5f5;
   border-bottom: 1px solid #e0e0e0;
+  user-select: none;
 `;
 
 export const MonthNavigation = styled.div`
@@ -184,5 +188,21 @@ export const ViewToggleButton = styled.button<{ isActive: boolean }>`
 
   &:focus {
     outline: none;
+  }
+`;
+
+export const SearchInput = styled.input`
+  padding: 8px;
+  border-radius: 4px;
+  border: none;
+  margin-left: 10px;
+  width: 200px;
+  background-color: #f5f5f5;
+  color: #000000;
+  
+  &:focus {
+    outline: none;
+    
+    color: #ff9800;
   }
 `;

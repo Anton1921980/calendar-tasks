@@ -18,6 +18,7 @@ interface TaskListProps {
   tasks: Task[];
   showInput: boolean;
   setShowInput: (show: boolean) => void;
+  searchText: string;
 }
 
 export const TaskList: React.FC<TaskListProps> = ({
@@ -25,6 +26,7 @@ export const TaskList: React.FC<TaskListProps> = ({
   tasks,
   showInput,
   setShowInput,
+  searchText,
 }) => {
   const dispatch = useDispatch();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -133,6 +135,11 @@ export const TaskList: React.FC<TaskListProps> = ({
     });
   };
 
+  const filteredTasks = tasks.filter(task => {
+    if (searchText.length < 2) return true;
+    return task.text.toLowerCase().includes(searchText.toLowerCase());
+  });
+
   return (
     <TaskListContainer isSelected={isSelected}>
       <AddTaskInput
@@ -142,7 +149,7 @@ export const TaskList: React.FC<TaskListProps> = ({
         onKeyDown={handleAddTask}
         placeholder="Add task and press Enter"
       />
-      {[...tasks].reverse().map((task) => (
+      {filteredTasks.reverse().map((task) => (
         <TaskItemWrapper
           key={task.id}
           isDraggingOver={dragOverTaskId === task.id}
