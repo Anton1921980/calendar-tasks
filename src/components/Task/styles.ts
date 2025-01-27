@@ -79,7 +79,7 @@ export const TaskContainer = styled.div<{ isDragging: boolean }>`
   padding-left: 0.5rem;
   margin-bottom: 0.5rem;
   cursor: move;
-  opacity: ${({ isDragging }) => isDragging ? 0.5 : 1};
+  // opacity: ${({ isDragging }) => isDragging ? 0.5 : 1};
   display: flex;
   justify-content: space-between;
   align-items: center;

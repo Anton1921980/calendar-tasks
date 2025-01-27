@@ -105,20 +105,24 @@ export const DayCell = styled.div<{ isSelected: boolean; isCurrentMonth: boolean
   padding: 0.5rem;
   position: relative;
   cursor: pointer;
-   user-select: none;
+  user-select: none;
   outline: none;
   opacity: ${({ isCurrentMonth }) => isCurrentMonth ? 1 : 0.5};
+  min-height: 100px;
+  z-index: 1;
   
   ${({ isSelected }) => isSelected && `
     background: #fff3e0;
   `}
-  
-  ${({ isToday }) => isToday && `
+   ${({ isToday }) => isToday && `
     .day-number {
       color: #ff9800;
       font-weight: bold;
     }
   `}
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
   
   &:hover {
     background: ${({ isSelected }) => isSelected ? '#fff3e0' : '#f8f8f8'};
@@ -127,23 +131,25 @@ export const DayCell = styled.div<{ isSelected: boolean; isCurrentMonth: boolean
 
 export const DayNumber = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   gap: 4px;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
   font-weight: 700;
   color: #666;
+  position: relative;
+  height: 24px;
 `;
 
-export const AddButton = styled.button<{ isVisible: boolean; date: string }>`
-display: ${({ isVisible, date }) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const buttonDate = new Date(date);
-  buttonDate.setHours(0, 0, 0, 0);
-  return isVisible && buttonDate >= today ? "flex" : "none"
-}};
+export const AddButton = styled.button<{ isVisible: boolean; date: string; isRotated?: boolean }>`
+  display: ${({ isVisible, date }) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const buttonDate = new Date(date);
+    buttonDate.setHours(0, 0, 0, 0);
+    return isVisible && buttonDate >= today ? "flex" : "none"
+  }};
   align-items: center;
   justify-content: center;
   background: none;
@@ -155,14 +161,19 @@ display: ${({ isVisible, date }) => {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  margin-left: 4px;
+  position: absolute;
+  left: 0;
+  top: 0;
   font-size: 1.5rem;
+  z-index: 2;
+  transition: transform 0.3s ease;
+  transform: ${({ isRotated }) => isRotated ? 'rotate(45deg)' : 'rotate(0deg)'};
   
   &:hover {
     background: rgba(255, 152, 0, 0.1);
   }
   &:focus {
-     outline: none;
+    outline: none;
   }
 `;
 
@@ -201,8 +212,77 @@ export const SearchInput = styled.input`
   color: #000000;
   
   &:focus {
-    outline: none;
-    
+    outline: none;    
     color: #ff9800;
   }
+`;
+
+export const HolidaysWrapper = styled.div<{ expanded: boolean }>`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  background-color: #e6510026;
+  margin-top: auto;
+  position: absolute;
+  border-radius: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  right: ${({ expanded }) => expanded ? '1%' : 0};
+  width: ${({ expanded }) => expanded && '98%'}; 
+  max-width: ${({ expanded }) => !expanded && '65%'};  
+   background-color: ${({ expanded }) => expanded && 'transparent'};  
+  cursor: pointer;  
+  &:focus {
+    width: 100%;
+  }
+
+  .holidays-dropdown {
+    max-height: 80px;
+    overflow: hidden;
+    overflow-y: auto;
+    width: 100%;
+    
+    position: absolute;
+    top: 100%;
+    z-index: 1000;
+    background: white;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 152, 0, 0.6) transparent;
+
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 152, 0, 0.6);
+      border-radius: 2px;
+    }
+  }
+`;
+
+export const HolidayText = styled.div<{ expanded?: boolean }>`
+  color: #e65100;
+  font-size: 11px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  cursor: ${({ onClick }) => onClick ? 'pointer' : 'default'};
+  
+  &:hover {
+    background-color: ${({ onClick }) => onClick ? '#e6510026' : 'transparent'};
+  }
+
+  &.expanded {
+    background-color: #e6510026;
+  }
+`;
+
+export const TaskCount = styled.span`
+  font-size: 10px;
+  font-weight: normal;
+  color: #666;
+  margin-left: 5px;
 `;

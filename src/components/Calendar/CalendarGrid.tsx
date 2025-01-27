@@ -12,8 +12,12 @@ import {
   DayCell,
   DayNumber,
   AddButton,
+  HolidayText,
+  HolidaysWrapper,
+  TaskCount,
 } from "./styles";
 import { TaskList } from "../Task/TaskList";
+import useHolidays from "../../hooks/useHolidays";
 
 const WEEKDAYS = [
   "Sunday",
@@ -31,17 +35,22 @@ interface CalendarGridProps {
   searchText: string;
 }
 
-export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentDate, view, searchText }) => {
-  
-  const [showInput, setShowInput] = useState(false);  
+export const CalendarGrid: React.FC<CalendarGridProps> = ({
+  currentDate,
+  view,
+  searchText,
+}) => {
+  const [showInput, setShowInput] = useState(false);
+  const [expandedDate, setExpandedDate] = useState<string | null>(null);
   const dispatch = useDispatch();
- 
+
   const selectedDate = useSelector(
     (state: RootState) => state.calendar.selectedDate
   );
   const tasks = useSelector((state: RootState) => state.tasks);
 
-  const calendarDays = view === 'month' ? getCalendarDays(currentDate) : getWeekDays(currentDate);
+  const calendarDays =
+    view === "month" ? getCalendarDays(currentDate) : getWeekDays(currentDate);
 
   const handleDateClick = (date: moment.Moment) => {
     dispatch(setSelectedDate(date.format("YYYY-MM-DD")));
@@ -49,24 +58,34 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentDate, view, s
 
   const handleDrop = (e: React.DragEvent, toDate: string) => {
     e.preventDefault();
-    const data = JSON.parse(e.dataTransfer.getData("text/plain"));
-    const { taskId, fromDate } = data;
+    try {
+      const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+      const { taskId, fromDate } = data;
 
-    if (fromDate !== toDate) {
-      const targetDateTasks = tasks[toDate] || [];
-      dispatch(
-        moveTask({
-          taskId,
-          fromDate,
-          toDate,
-          newOrder: targetDateTasks.length,
-        })
-      );
+      if (fromDate !== toDate) {
+        dispatch(
+          moveTask({
+            taskId,
+            fromDate,
+            toDate,
+            newOrder: tasks[toDate]?.length || 0,
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Error handling drop:", error);
     }
   };
 
+  const { holidays, loading } = useHolidays(currentDate.year().toString());
+
   return (
-    <> 
+    <>
+      {loading && (
+        <div style={{ textAlign: 'center', padding: '10px' }}>
+          holidays are loading!
+        </div>
+      )}
       <WeekDaysGrid>
         {WEEKDAYS.map((day) => (
           <WeekDay key={day}>{day.slice(0, 3)}</WeekDay>
@@ -89,32 +108,101 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentDate, view, s
               onDrop={(e) => handleDrop(e, dateStr)}
             >
               <DayNumber className="day-number">
-                <div>
-                  {date.format("D")}
-                  {dayTasks.length > 0 && (
-                    <span style={{ fontSize: '10px', fontWeight: 'normal', color: '#666', marginLeft: '10px' }}>
-                      {dayTasks.length} {dayTasks.length === 1 ? 'card' : 'cards'}
-                    </span>
-                  )}
-                </div>
+                {!isSelected && (
+                  <>
+                    {date.format("D")}
+                    {dayTasks.length > 0 && (
+                      <TaskCount>
+                        {dayTasks.length}{" "}
+                        {dayTasks.length === 1 ? "card" : "cards"}
+                      </TaskCount>
+                    )}
+                  </>
+                )}
                 <AddButton
                   isVisible={isSelected}
                   date={dateStr}
+                  isRotated={showInput && selectedDate === dateStr}
                   onClick={(e) => {
                     e.stopPropagation();
-                    setShowInput(true);
+                    if (showInput && selectedDate === dateStr) {
+                      setShowInput(false);
+                      dispatch(setSelectedDate("")); // Deselect the date
+                    } else {
+                      dispatch(setSelectedDate(dateStr));
+                      setShowInput(true);
+                    }
                   }}
                 >
                   +
                 </AddButton>
               </DayNumber>
-              <TaskList
-                date={date.format("YYYY-MM-DD")}
-                tasks={tasks[date.format("YYYY-MM-DD")] || []}
-                showInput={isSelected && showInput}
-                setShowInput={setShowInput}
-                searchText={searchText}
-              />
+              <HolidaysWrapper expanded={expandedDate === dateStr}>
+                {(() => {
+                  const dateHolidays = [
+                    ...holidays
+                        .filter((holiday) => holiday.date === dateStr)
+                        .map((holiday) => holiday.name)                    
+                  ];
+
+                  if (dateHolidays.length === 0) return null;
+
+                  if (dateHolidays.length === 1) {
+                    return <HolidayText expanded={false}>
+                      {dateHolidays[0].length > 22
+                      ? `${dateHolidays[0].slice(0, 19)}...` 
+                      : dateHolidays[0]}</HolidayText>;
+                  }
+
+                  return (
+                    <>
+                      <HolidayText
+                        expanded={expandedDate === dateStr}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setExpandedDate(
+                            expandedDate === dateStr ? null : dateStr
+                          );
+                        }}                       
+                      >                       
+                        {expandedDate === dateStr
+                          ? ""
+                          : dateHolidays[0].length > 22
+                            ? `${dateHolidays[0].slice(0, 19)}...` 
+                            : dateHolidays[0]}{" "}
+                        <span>
+                          {" "}
+                          ▼{" "}
+                        </span>
+                      </HolidayText>
+                      {expandedDate === dateStr && (
+                        <div className="holidays-dropdown">
+                          {dateHolidays.map((holiday, index) => (
+                            <HolidayText
+                              key={index}
+                              style={{ marginTop: "2px" }}
+                              className="expanded"
+                              expanded={true}
+                            >
+                              {holiday}
+                            </HolidayText>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+              </HolidaysWrapper>
+              {expandedDate !== dateStr && (
+                 <TaskList
+                 date={dateStr}
+                 tasks={dayTasks}
+                 showInput={isSelected && showInput}
+                 setShowInput={setShowInput}
+                 searchText={searchText}
+               />
+              )}
+             
             </DayCell>
           );
         })}

@@ -64,38 +64,54 @@ export const TaskList: React.FC<TaskListProps> = ({
     e.preventDefault();
     if (draggedTaskId !== taskId) {
       setDragOverTaskId(taskId);
+    } else {
+      setDragOverTaskId(null);
     }
   };
 
   const handleDrop = (e: React.DragEvent, targetTaskId: string) => {
     e.preventDefault();
     e.stopPropagation();
-    const data = JSON.parse(e.dataTransfer.getData("text/plain"));
-    const { taskId, fromDate } = data;
+    setDragOverTaskId(null);
+    try {
+      const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+      const { taskId, fromDate } = data;
 
-    if (fromDate === date && taskId !== targetTaskId) {
-      const currentTasks = [...tasks];
-      const draggedTaskIndex = currentTasks.findIndex((t) => t.id === taskId);
-      const targetTaskIndex = currentTasks.findIndex(
-        (t) => t.id === targetTaskId
-      );
+      if (fromDate === date && taskId !== targetTaskId) {
+        // Reordering within the same date
+        const currentTasks = [...tasks];
+        const draggedTaskIndex = currentTasks.findIndex((t) => t.id === taskId);
+        const targetTaskIndex = currentTasks.findIndex((t) => t.id === targetTaskId);
 
-      if (draggedTaskIndex !== -1 && targetTaskIndex !== -1) {
-        const newTasks = [...currentTasks];
-        const [draggedTask] = newTasks.splice(draggedTaskIndex, 1);
-        newTasks.splice(targetTaskIndex, 0, draggedTask);
+        if (draggedTaskIndex !== -1 && targetTaskIndex !== -1) {
+          const newTasks = [...currentTasks];
+          const [draggedTask] = newTasks.splice(draggedTaskIndex, 1);
+          newTasks.splice(targetTaskIndex, 0, draggedTask);
 
-        const taskIds = newTasks.map((task) => task.id);
+          const taskIds = newTasks.map((task) => task.id);
 
+          dispatch(
+            reorderTasks({
+              date,
+              taskIds,
+            })
+          );
+        }
+      } else if (fromDate !== date) {
+        // Moving to a different date
+        const targetIndex = tasks.findIndex(t => t.id === targetTaskId);
         dispatch(
-          reorderTasks({
-            date,
-            taskIds,
+          moveTask({
+            taskId,
+            fromDate,
+            toDate: date,
+            newOrder: targetIndex !== -1 ? targetIndex : tasks.length,
           })
         );
       }
+    } catch (error) {
+      console.error("Error handling drop:", error);
     }
-    setDragOverTaskId(null);
   };
 
   const handleAddTask = (e: React.KeyboardEvent<HTMLInputElement>) => {
