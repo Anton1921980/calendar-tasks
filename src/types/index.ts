@@ -6,10 +6,11 @@ export interface CalendarDay {
   }
   
   export interface Task {
-    id: string;
+    _id: string;
     text: string;
     date: string;
     order: number;
+    userId: string;
   }
   
   export interface Holiday {
