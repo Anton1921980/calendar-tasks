@@ -1,20 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {TaskContainer, TaskText, TaskInput, TaskActions, DeleteButton} from "./styles";
+import { TaskContainer, TaskText, TaskInput, TaskActions, DeleteButton, StatusChip, TaskContent } from "./styles";
+import { FaTrash } from "react-icons/fa6";
 
 interface TaskItemProps {
-  id: string;
+  _id: string;
   text: string;
+  status: 'plan' | 'progress' | 'done';
+  draggable?: boolean;
   isDragging?: boolean;
   onDragStart: (e: React.DragEvent, taskId: string) => void;
   onDragEnd: () => void;
   onDelete: (taskId: string) => void;
-  onEdit: (taskId: string, newText: string) => void;
+  onEdit: (taskId: string, newText: string, newStatus?: 'plan' | 'progress' | 'done') => void;
 }
 
 export const TaskItem: React.FC<TaskItemProps> = ({
-  id,
+  _id,
   text,
+  status,
   isDragging = false,
+  draggable = true,
   onDragStart,
   onDragEnd,
   onDelete,
@@ -35,10 +40,23 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     setIsEditing(true);
   };
 
+  const handleStatusClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log('Current status:', status);
+    const nextStatus = {
+      plan: 'progress',
+      progress: 'done',
+      done: 'plan',
+    }[status] as 'plan' | 'progress' | 'done';
+    
+    console.log('Next status:', nextStatus);
+    onEdit(_id, text, nextStatus);
+  };
+
   const handleBlur = () => {
     setIsEditing(false);
     if (editedText.trim() !== text) {
-      onEdit(id, editedText);
+      onEdit(_id, editedText);
     }
   };
 
@@ -46,43 +64,45 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     if (e.key === 'Enter') {
       setIsEditing(false);
       if (editedText.trim() !== text) {
-        onEdit(id, editedText);
+        onEdit(_id, editedText);
       }
     }
   };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onDelete(id);
+    onDelete(_id);
   };
 
-  return (
+  return (      
     <TaskContainer
       isDragging={isDragging}
-      onDragStart={(e) => onDragStart(e, id)}
+      draggable={!isEditing && draggable}
+      onDragStart={(e) => onDragStart(e, _id)}
       onDragEnd={onDragEnd}
-      draggable={!isEditing}
       onClick={handleClick}
     >
-      {isEditing ? (
-        <TaskInput
-          ref={inputRef}
-          value={editedText}
-          onChange={(e) => setEditedText(e.target.value)}
-          onBlur={handleBlur}
-          onKeyPress={handleKeyPress}
-          onClick={(e) => e.stopPropagation()}
-        />
-      ) : (
-        <>
-          <TaskText>{text}</TaskText>
-          <TaskActions className="task-actions">
-            <DeleteButton onClick={handleDelete}>
-            ✕
-            </DeleteButton>
-          </TaskActions>
-        </>
-      )}
-    </TaskContainer>
+      <TaskContent>
+        <StatusChip status={status} onClick={handleStatusClick} />
+        {isEditing ? (
+          <TaskInput
+            ref={inputRef}
+            type="text"
+            value={editedText}
+            onChange={(e) => setEditedText(e.target.value)}
+            onBlur={handleBlur}
+            onKeyPress={handleKeyPress}
+            onClick={(e) => e.stopPropagation()}
+          />
+        ) : (
+          <TaskText onClick={handleClick}>{text}</TaskText>
+        )}
+      </TaskContent>
+      <TaskActions>
+        <DeleteButton onClick={handleDelete}>
+          <FaTrash />
+        </DeleteButton>
+      </TaskActions>      
+    </TaskContainer>  
   );
 };

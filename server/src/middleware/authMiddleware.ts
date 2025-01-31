@@ -5,7 +5,7 @@ interface JwtPayload {
   id: string;
 }
 
-// Розширюємо типи Express Request
+// Extending Express Request types
 export interface AuthRequest extends Request {
   user?: JwtPayload;
 }

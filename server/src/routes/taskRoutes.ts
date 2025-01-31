@@ -1,15 +1,26 @@
 import { Router, RequestHandler } from 'express';
-import { createTask, getTasksByDate, updateTask, deleteTask } from '../controllers/taskController';
+import { 
+  createTask, 
+  getTasksByDate, 
+  getTasksByDateRange, 
+  updateTask, 
+  deleteTask,
+  getPublicTasksByDateRange 
+} from '../controllers/taskController';
 import { authMiddleware } from '../middleware/authMiddleware';
 
 const router = Router();
 
-// Всі роути захищені middleware аутентифікації
+// Public route - no auth required
+router.get('/public/date/:startDate/:endDate', getPublicTasksByDateRange as RequestHandler);
+
+// All routes below are protected by authentication middleware
 router.use(authMiddleware as RequestHandler);
 
-// Task routes
+// Protected task routes
 router.post('/', createTask as RequestHandler);
 router.get('/date/:date', getTasksByDate as RequestHandler);
+router.get('/date/:startDate/:endDate', getTasksByDateRange as RequestHandler);
 router.put('/:id', updateTask as RequestHandler);
 router.delete('/:id', deleteTask as RequestHandler);
 

@@ -11,6 +11,7 @@ export interface CalendarDay {
     date: string;
     order: number;
     userId: string;
+    status: 'plan' | 'progress' | 'done';
   }
   
   export interface Holiday {

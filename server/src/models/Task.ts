@@ -5,6 +5,7 @@ export interface ITask extends Document {
   date: string;
   order: number;
   userId: mongoose.Types.ObjectId;
+  status: 'plan' | 'progress' | 'done';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,6 +22,12 @@ const TaskSchema: Schema = new Schema({
   },
   order: {
     type: Number,
+    required: true
+  },
+  status: {
+    type: String,
+    enum: ['plan', 'progress', 'done'],
+    default: 'plan',
     required: true
   },
   userId: {

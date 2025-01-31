@@ -1,9 +1,20 @@
 import axios from './axios';
 import { Task } from '../types/index';
 import { NewTask } from '../store/slices/tasksSlice';
+import moment from 'moment';
 
 export const getTasks = async () => {
-  const response = await axios.get<Task[]>('/tasks');
+  const currentDate = moment();
+  const monthStart = currentDate.clone().startOf('month');
+  const monthEnd = currentDate.clone().endOf('month');
+  const calendarStart = monthStart.clone().startOf('week');
+  const calendarEnd = monthEnd.clone().endOf('week');
+
+  // Format dates for API
+  const startDate = calendarStart.format('YYYY-MM-DD');
+  const endDate = calendarEnd.format('YYYY-MM-DD');
+
+  const response = await axios.get<Task[]>(`/tasks/date/${startDate}/${endDate}`);
   return response.data;
 };
 

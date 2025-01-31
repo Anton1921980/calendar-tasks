@@ -31,17 +31,26 @@ export const TaskListContainer = styled.div<{ isSelected: boolean }>`
   }
 `;
 
-export const TaskItemWrapper = styled.div<{ isDraggingOver: boolean }>`
+interface TaskItemWrapperProps {
+  $isDragOver?: boolean;
+  $dragPosition?: 'top' | 'bottom';
+}
+
+export const TaskItemWrapper = styled.div<TaskItemWrapperProps>`
+  margin: 4px 0;
   position: relative;
-  &:after {
-    content: "";
-    display: ${(props) => (props.isDraggingOver ? "block" : "none")};
+  transition: opacity 0.2s;
+
+  &::before {
+    content: '';
     position: absolute;
     left: 0;
     right: 0;
     height: 2px;
-    background: #ff9800;
-    bottom: 0;
+    background-color: #ff9800;
+    opacity: ${({ $isDragOver }) => ($isDragOver ? 1 : 0)};
+    ${({ $dragPosition }) => $dragPosition === 'top' ? 'top: -1px;' : 'bottom: -1px;'}
+    transition: opacity 0.2s;
   }
 `;
 
@@ -71,7 +80,7 @@ export const AddTaskInput = styled.input<{ isVisible: boolean, date: string }>`
 `;
 
 
-export const TaskContainer = styled.div<{ isDragging: boolean }>`
+export const TaskContainer = styled.div<{ isDragging?: boolean }>`
   background: white;
   border: 1px solid #e0e0e0;
   border-radius: 4px;
@@ -91,6 +100,35 @@ export const TaskContainer = styled.div<{ isDragging: boolean }>`
       opacity: 1;
     }
   }
+`;
+
+export const StatusChip = styled.div<{ status: 'plan' | 'progress' | 'done' }>`
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+  cursor: pointer;
+  background-color: ${({ status }) => {
+    switch (status) {
+      case 'plan':
+        return '#ffd700'; // yellow
+      case 'progress':
+        return '#87ceeb'; // light blue
+      case 'done':
+        return '#90ee90'; // light green
+      default:
+        return '#ffd700';
+    }
+  }};
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+export const TaskContent = styled.div`
+  display: flex;
+  align-items: center;
+  flex: 1;
 `;
 
 export const TaskText = styled.div`
@@ -114,10 +152,9 @@ export const TaskInput = styled.input`
 `;
 
 export const TaskActions = styled.div`
-  opacity: 0;
-  transition: opacity 0.2s;
   display: flex;
   gap: 0.5rem;
+  padding-right: 8px;
 `;
 
 export const DeleteButton = styled.button`
@@ -125,12 +162,22 @@ export const DeleteButton = styled.button`
   border: none;
   color: #ff5252;
   cursor: pointer;
-  padding: 2px;
+  padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 14px;
   
   &:hover {
     color: #ff1744;
+    background-color: rgba(255, 82, 82, 0.1);
+    border-radius: 4px;
+  }
+&:focus {
+    outline: none;    
+  }
+  svg {
+    width: 14px;
+    height: 14px;
   }
 `;

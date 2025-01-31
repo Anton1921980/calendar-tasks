@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import * as tasksApi from '../../api/tasks';
+import * as publicTasksApi from '../../api/publicTasks';
+import { RootState } from '..';
 
 export interface Task {
   _id: string;
@@ -7,13 +9,14 @@ export interface Task {
   date: string;
   order: number;
   userId: string;
+  status: 'plan' | 'progress' | 'done';
 }
 
 export type NewTask = Omit<Task, '_id' | 'userId'>;
 
 interface TasksState {
   items: { [date: string]: Task[] };
-  loading: boolean;
+  fetchLoading: boolean;
   error: string | null;
 }
 
@@ -23,6 +26,7 @@ interface MoveTaskPayload {
   toDate: string;
   newOrder: number;
   newText?: string;
+  newStatus?: 'plan' | 'progress' | 'done';
 }
 
 interface ReorderTasksPayload {
@@ -32,40 +36,92 @@ interface ReorderTasksPayload {
 
 const initialState: TasksState = {
   items: {},
-  loading: false,
+  fetchLoading: false,
   error: null
 };
 
 // Async thunks
 export const fetchTasks = createAsyncThunk(
   'tasks/fetchTasks',
-  async () => {
-    const response = await tasksApi.getTasks();
-    return response;
+  async (_, { getState }) => {
+    const state = getState() as RootState;
+    const isAuthenticated = state.auth.isAuthenticated;
+    
+    if (isAuthenticated) {
+      return await tasksApi.getTasks();
+    } else {
+      return await publicTasksApi.getPublicTasks();
+    }
   }
 );
 
 export const createTask = createAsyncThunk<Task, Omit<Task, '_id' | 'userId'>>(
   'tasks/createTask',
-  async (task) => {
-    const response = await tasksApi.createTask(task);
-    return response;
+  async (task, { rejectWithValue }) => {
+    try {
+      const response = await tasksApi.createTask(task);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : 'Failed to create task');
+    }
   }
 );
 
 export const updateTaskThunk = createAsyncThunk(
   'tasks/updateTask',
-  async ({ taskId, updates }: { taskId: string; updates: Partial<Task> }) => {
-    const response = await tasksApi.updateTask(taskId, updates);
-    return response;
+  async ({ taskId, fromDate, toDate, newOrder, newText, newStatus }: MoveTaskPayload, { rejectWithValue, getState }) => {
+    const state = getState() as RootState;
+    const isAuthenticated = state.auth.isAuthenticated;
+    
+    // Only check authentication for text/status updates, allow reordering for everyone
+    if (!isAuthenticated && (newText !== undefined || newStatus !== undefined)) {
+      throw new Error('You need to be authenticated to edit tasks');
+    }
+
+    try {
+      const updates: Partial<Task> = {
+        date: toDate,
+        order: newOrder
+      };
+      if (newText !== undefined) {
+        updates.text = newText;
+      }
+      if (newStatus !== undefined) {
+        updates.status = newStatus;
+      }
+
+      // For demo mode, just update the local state without API call
+      if (!isAuthenticated) {
+        const task = state.tasks.items[fromDate]?.find(t => t._id === taskId);
+        if (!task) throw new Error('Task not found');
+        return {
+          ...task,
+          ...updates
+        };
+      }
+
+      // For authenticated users, make the API call
+      const response = await tasksApi.updateTask(taskId, updates);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : 'Failed to update task');
+    }
   }
 );
 
 export const deleteTaskThunk = createAsyncThunk(
   'tasks/deleteTask',
-  async ({ taskId }: { taskId: string }) => {
+  async ({ taskId, date }: { taskId: string; date: string }, { getState, dispatch }) => {
+    const state = getState() as RootState;
+    const isAuthenticated = state.auth.isAuthenticated;
+    
+    if (!isAuthenticated) {
+      throw new Error('You need to be authenticated to delete tasks');
+    }
+    
     await tasksApi.deleteTask(taskId);
-    return taskId;
+    dispatch(deleteTask({ taskId, date }));
+    return { taskId, date };
   }
 );
 
@@ -90,7 +146,7 @@ const tasksSlice = createSlice({
       }
     },
     moveTask: (state, action: PayloadAction<MoveTaskPayload>) => {
-      const { taskId, fromDate, toDate, newOrder, newText } = action.payload;
+      const { taskId, fromDate, toDate, newOrder, newText, newStatus } = action.payload;
       
       if (!state.items[fromDate]) return;
       
@@ -100,6 +156,9 @@ const tasksSlice = createSlice({
       const task = { ...state.items[fromDate][taskIndex] };
       if (newText !== undefined) {
         task.text = newText;
+      }
+      if (newStatus !== undefined) {
+        task.status = newStatus;
       }
       
       if (fromDate === toDate) {
@@ -134,12 +193,16 @@ const tasksSlice = createSlice({
     builder
       // Fetch tasks
       .addCase(fetchTasks.pending, (state) => {
-        state.loading = true;
+        state.fetchLoading = true;
         state.error = null;
       })
-      .addCase(fetchTasks.fulfilled, (state, action: PayloadAction<Task[]>) => {
-        state.loading = false;
-        state.items = action.payload.reduce<{ [key: string]: Task[] }>((acc, task) => {
+      .addCase(fetchTasks.fulfilled, (state, action) => {
+        state.fetchLoading = false;
+        const tasks = action.payload.map(task => ({
+          ...task,
+          status: task.status || 'plan' // Ensure status exists
+        }));
+        state.items = tasks.reduce<{ [key: string]: Task[] }>((acc, task) => {
           if (!acc[task.date]) {
             acc[task.date] = [];
           }
@@ -148,60 +211,72 @@ const tasksSlice = createSlice({
         }, {});
       })
       .addCase(fetchTasks.rejected, (state, action) => {
-        state.loading = false;
+        state.fetchLoading = false;
         state.error = action.error.message || 'Failed to fetch tasks';
       })
       // Create task
-      .addCase(createTask.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(createTask.fulfilled, (state, action: PayloadAction<Task>) => {
-        state.loading = false;
-        const task = action.payload;
-        if (!state.items[task.date]) {
-          state.items[task.date] = [];
+      .addCase(createTask.fulfilled, (state, action) => {
+        const { date } = action.payload;
+        if (!state.items[date]) {
+          state.items[date] = [];
         }
-        state.items[task.date].push(task);
+        // Increment the order of existing tasks
+        state.items[date] = state.items[date].map(task => ({
+          ...task,
+          order: task.order + 1
+        }));
+        // Add the new task at the beginning with order 0
+        state.items[date].unshift({
+          ...action.payload,
+          order: 0
+        });
       })
       .addCase(createTask.rejected, (state, action) => {
-        state.loading = false;
         state.error = action.error.message || 'Failed to create task';
       })
       // Update task
-      .addCase(updateTaskThunk.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(updateTaskThunk.fulfilled, (state, action: PayloadAction<Task>) => {
-        state.loading = false;
+      .addCase(updateTaskThunk.fulfilled, (state, action) => {
         const updatedTask = action.payload;
-        const tasks = state.items[updatedTask.date];
-        if (tasks) {
-          const index = tasks.findIndex(task => task._id === updatedTask._id);
-          if (index !== -1) {
-            tasks[index] = updatedTask;
-          }
+        const fromDate = Object.keys(state.items).find(date => 
+          state.items[date].some(task => task._id === updatedTask._id)
+        );
+        
+        // Remove from old date if moving between dates
+        if (fromDate && fromDate !== updatedTask.date) {
+          state.items[fromDate] = state.items[fromDate].filter(
+            task => task._id !== updatedTask._id
+          );
         }
+
+        // Add/Update in new date
+        if (!state.items[updatedTask.date]) {
+          state.items[updatedTask.date] = [];
+        }
+
+        const existingIndex = state.items[updatedTask.date].findIndex(
+          task => task._id === updatedTask._id
+        );
+
+        if (existingIndex !== -1) {
+          state.items[updatedTask.date][existingIndex] = updatedTask;
+        } else {
+          state.items[updatedTask.date].push(updatedTask);
+        }
+
+        // Sort tasks by order
+        state.items[updatedTask.date].sort((a, b) => a.order - b.order);
       })
       .addCase(updateTaskThunk.rejected, (state, action) => {
-        state.loading = false;
         state.error = action.error.message || 'Failed to update task';
       })
       // Delete task
-      .addCase(deleteTaskThunk.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(deleteTaskThunk.fulfilled, (state, action: PayloadAction<string>) => {
-        state.loading = false;
-        // Find and remove the task
+      .addCase(deleteTaskThunk.fulfilled, (state, action) => {
+        const { taskId } = action.payload;
         Object.keys(state.items).forEach(date => {
-          state.items[date] = state.items[date].filter(task => task._id !== action.payload);
+          state.items[date] = state.items[date].filter(task => task._id !== taskId);
         });
       })
       .addCase(deleteTaskThunk.rejected, (state, action) => {
-        state.loading = false;
         state.error = action.error.message || 'Failed to delete task';
       });
   },

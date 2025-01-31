@@ -286,3 +286,114 @@ export const TaskCount = styled.span`
   color: #666;
   margin-left: 5px;
 `;
+
+export const StatusFilters = styled.div`
+  display: flex;
+  gap: 8px;
+  margin: 0 16px;
+`;
+
+export const StatusFilterButton = styled.button<{ active: boolean; status?: 'plan' | 'progress' | 'done' }>`
+  padding: 4px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: opacity 0.2s;
+  
+  &:focus{ outline: none;};
+
+  ${({ status, active }) => {
+    let backgroundColor = '#e0e0e0'; // Default gray for 'all'
+    
+    if (status === 'plan') backgroundColor = '#ffd700';
+    if (status === 'progress') backgroundColor = '#87ceeb';
+    if (status === 'done') backgroundColor = '#90ee90';
+    
+    return `
+      background-color: ${backgroundColor};
+      opacity: ${active ? 1 : 0.6};
+      
+      &:hover {
+        opacity: 0.8;
+      }
+    `;
+  }}
+`;
+
+export const AuthIcons = styled.div`
+  display: flex;
+  gap: 15px;
+  align-items: center;
+`;
+
+export const AuthIcon = styled.div`
+  color: white;
+  cursor: pointer;
+  font-size: 20px;
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+export const Modal = styled.div<{ isOpen: boolean }>`
+  display: ${props => props.isOpen ? 'flex' : 'none'};
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+export const ModalContent = styled.div`
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  min-width: 300px;
+`;
+
+export const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
+
+export const Input = styled.input`
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+`;
+
+export const Button = styled.button`
+  padding: 8px;
+  background: #ff9800;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  &:hover {
+    background: #f57c00;
+  }
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+`;
+
+export const ErrorMessage = styled.div`
+  color: red;
+  margin-bottom: 10px;
+  text-align: center;
+`;
+
+export const DemoModeBanner = styled.div`
+  background-color: lightgray;
+  color: black;
+  text-align: center;
+  padding: 4px;
+  font-size: 14px;
+`;

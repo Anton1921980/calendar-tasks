@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import moment from "moment";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store";
@@ -17,6 +17,7 @@ import {
   TaskCount,
 } from "./styles";
 import { TaskList } from "../Task/TaskList";
+import { LoadingSpinner } from "../shared/LoadingSpinner";
 import useHolidays from "../../hooks/useHolidays";
 
 const WEEKDAYS = [
@@ -33,26 +34,34 @@ interface CalendarGridProps {
   currentDate: moment.Moment;
   view: string;
   searchText: string;
+  selectedStatus: 'all' | 'plan' | 'progress' | 'done';
 }
 
-export const CalendarGrid: React.FC<CalendarGridProps> = ({
+export const CalendarGrid = memo<CalendarGridProps>(({
   currentDate,
   view,
   searchText,
+  selectedStatus,
 }) => {
   const [showInput, setShowInput] = useState(false);
   const [expandedDate, setExpandedDate] = useState<string | null>(null);
   const dispatch = useDispatch();
+  const { holidays, loading: holidaysLoading } = useHolidays(currentDate.year().toString());
 
   const selectedDate = useSelector(
     (state: RootState) => state.calendar.selectedDate
   );
-  const tasks = useSelector((state: RootState) => state.tasks);
+  const { items: tasks, fetchLoading } = useSelector((state: RootState) => state.tasks);
+
+  if (fetchLoading) {
+    return <LoadingSpinner />;
+  }
 
   const calendarDays =
     view === "month" ? getCalendarDays(currentDate) : getWeekDays(currentDate);
 
-  const handleDateClick = (date: moment.Moment) => {
+  const handleDateClick = (date: moment.Moment, e: React.MouseEvent) => {
+    e.preventDefault();
     dispatch(setSelectedDate(date.format("YYYY-MM-DD")));
   };
 
@@ -77,11 +86,9 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
     }
   };
 
-  const { holidays, loading } = useHolidays(currentDate.year().toString());
-
   return (
-    <>
-      {loading && (
+    <>  
+      {holidaysLoading && (
         <div style={{ textAlign: 'center', padding: '10px' }}>
           holidays are loading!
         </div>
@@ -103,7 +110,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
               isCurrentMonth={isCurrentMonth}
               isToday={isToday}
               isSelected={isSelected}
-              onClick={() => handleDateClick(date)}
+              onClick={(e) => handleDateClick(date, e)}
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => handleDrop(e, dateStr)}
             >
@@ -119,24 +126,24 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
                     )}
                   </>
                 )}
-                <AddButton
-                  isVisible={isSelected}
-                  date={dateStr}
-                  isRotated={showInput && selectedDate === dateStr}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (showInput && selectedDate === dateStr) {
-                      setShowInput(false);
-                      dispatch(setSelectedDate("")); // Deselect the date
-                    } else {
-                      dispatch(setSelectedDate(dateStr));
-                      setShowInput(true);
-                    }
-                  }}
-                >
-                  +
-                </AddButton>
               </DayNumber>
+              <AddButton
+                isVisible={isSelected}
+                date={dateStr}
+                isRotated={showInput && selectedDate === dateStr}
+                onClick={(e) => {                 
+                  e.stopPropagation();                  
+                  if (showInput && selectedDate === dateStr) {                
+                    setShowInput(false);
+                    dispatch(setSelectedDate("")); // Deselect the date
+                  } else {
+                    dispatch(setSelectedDate(dateStr));
+                    setShowInput(true);
+                  }
+                }}
+              >
+                +
+              </AddButton>
               <HolidaysWrapper expanded={expandedDate === dateStr}>
                 {(() => {
                   const dateHolidays = [
@@ -200,6 +207,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
                  showInput={isSelected && showInput}
                  setShowInput={setShowInput}
                  searchText={searchText}
+                 selectedStatus={selectedStatus}
                />
               )}
              
@@ -209,4 +217,4 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
       </StyledGrid>
     </>
   );
-};
+});
