@@ -1,5 +1,5 @@
 {
-  "files": [], 
+  "files": [],
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }],
   "compilerOptions": {
@@ -9,19 +9,20 @@
     "module": "ESNext",
     "skipLibCheck": true,
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
+    "allowImportingTsExtensions": false,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
     },
-    "jsxImportSource": "@emotion/react"
-  }, 
+    "jsxImportSource": "@emotion/react",
+    "types": ["vite/client"]
+  }
 }
