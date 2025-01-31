@@ -2,11 +2,12 @@
   "name": "calendar-tasks-server",
   "version": "1.0.0",
   "description": "Backend for Calendar Tasks application",
-  "main": "build/app.js",
+  "main": "src/app.ts",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
     "build": "tsc",
     "start": "node build/app.js",
+    "vercel-build": "tsc",
     "test": "cross-env NODE_ENV=test jest --detectOpenHandles",
     "test:watch": "cross-env NODE_ENV=test jest --watch"
   },
