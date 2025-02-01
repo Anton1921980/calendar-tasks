@@ -13,3 +13,9 @@ export const store = configureStore({
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+
+// Re-export everything
+export * from './slices/calendarSlice';
+export * from './slices/tasksSlice';
+export * from './slices/authSlice';
+export * from './hooks';

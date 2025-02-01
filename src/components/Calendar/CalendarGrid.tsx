@@ -1,10 +1,8 @@
 import React, { useState, memo } from 'react';
 import moment from 'moment';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../../store';
-import { setSelectedDate } from '../../store/slices/calendarSlice';
-import { moveTask } from '../../store/slices/tasksSlice';
-import { getCalendarDays, getWeekDays } from '../../utils/dateUtils';
+import { RootState, setSelectedDate, moveTask } from '~/store';
+import { getCalendarDays, getWeekDays } from '~/utils/dateUtils';
 import {
   WeekDaysGrid,
   WeekDay,
@@ -14,11 +12,10 @@ import {
   AddButton,
   HolidayText,
   HolidaysWrapper,
-  TaskCount,
 } from './styles';
 import { TaskList } from '../Task/TaskList';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
-import useHolidays from '../../hooks/useHolidays';
+import useHolidays from '~/hooks/useHolidays';
 
 const WEEKDAYS = [
   "Sunday",
@@ -118,11 +115,10 @@ export const CalendarGrid = memo<CalendarGridProps>(({
                 {!isSelected && (
                   <>
                     {date.format("D")}
-                    {dayTasks.length > 0 && (
-                      <TaskCount>
-                        {dayTasks.length}{" "}
-                        {dayTasks.length === 1 ? "card" : "cards"}
-                      </TaskCount>
+                    {holidays && holidays[dateStr] && (
+                      <HolidaysWrapper expanded={false}>
+                        <HolidayText>{holidays[dateStr]}</HolidayText>
+                      </HolidaysWrapper>
                     )}
                   </>
                 )}
