@@ -1,8 +1,8 @@
 import React from 'react';
 import moment from 'moment';
-import { setCurrentDate } from '@/store/slices/calendarSlice';
-import { fetchTasks } from '@/store/slices/tasksSlice';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { setCurrentDate } from '../../store/slices/calendarSlice';
+import { fetchTasks } from '../../store/slices/tasksSlice';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { CalendarGrid } from './CalendarGrid';
 import { AuthButton } from '../Auth/AuthButton';
 import { WelcomeModal } from '../Auth/WelcomeModal';
