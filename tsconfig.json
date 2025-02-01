@@ -16,12 +16,13 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
-    "baseUrl": ".",
+    "baseUrl": "./src",
     "paths": {
-      "@/*": ["./src/*"]
+      "~/*": ["./*"]
     },
     "jsxImportSource": "@emotion/react",
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+    "allowJs": true
   },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useAppDispatch } from '@/store/hooks';
-import { login as loginAction } from '@/store/slices/authSlice';
-import * as authApi from '@/api/auth';
+import { useAppDispatch } from '~/store/hooks';
+import { login as loginAction } from '~/store/slices/authSlice';
+import * as authApi from '~/api/auth';
 import {
   ModalOverlay,
   ModalContent,

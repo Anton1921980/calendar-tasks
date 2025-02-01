@@ -1,6 +1,6 @@
 import React from 'react';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { logout } from '@/store/slices/authSlice';
+import { useAppDispatch, useAppSelector } from '~/store/hooks';
+import { logout } from '~/store/slices/authSlice';
 import { AuthModal } from './AuthModal';
 import styled from '@emotion/styled';
 import { FaUser, FaSignOutAlt } from 'react-icons/fa';
