@@ -142,19 +142,9 @@ export const TaskList: React.FC<TaskListProps> = ({
     }
   };
 
-  const handleTaskEdit = (taskId: string, newText: string, newStatus?: 'plan' | 'progress' | 'done') => {
-    console.log('TaskList - Edit called with:', { taskId, newText, newStatus });
+  const handleTaskEdit = (taskId: string, newText: string, newStatus?: 'plan' | 'progress' | 'done') => { 
     const task = tasks.find((t) => t._id === taskId);
-    if (task) {
-      console.log('TaskList - Found task:', task);
-      console.log('TaskList - Dispatching update with:', {
-        taskId,
-        fromDate: date,
-        toDate: date,
-        newOrder: task.order,
-        newText,
-        newStatus
-      });
+    if (task) {    
       dispatch(
         updateTaskThunk({
           taskId,

@@ -80,6 +80,39 @@ export const AddTaskInput = styled.input<{ isVisible: boolean, date: string }>`
 `;
 
 
+export const TaskActions = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  padding-right: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+`;
+
+export const DeleteButton = styled.button`
+  background: none;
+  border: none;
+  color: #5e5757;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  
+  &:hover {
+    color: #ff1744;
+    background-color: rgba(255, 82, 82, 0.1);
+    border-radius: 4px;
+  }
+&:focus {
+    outline: none;    
+  }
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+`;
+
 export const TaskContainer = styled.div<{ isDragging?: boolean }>`
   background: white;
   border: 1px solid #e0e0e0;
@@ -96,7 +129,7 @@ export const TaskContainer = styled.div<{ isDragging?: boolean }>`
   
   &:hover {
     background: #f8f8f8;
-    .task-actions {
+    & ${TaskActions} {
       opacity: 1;
     }
   }
@@ -148,36 +181,5 @@ export const TaskInput = styled.input`
   
   &:focus {
     outline: none;
-  }
-`;
-
-export const TaskActions = styled.div`
-  display: flex;
-  gap: 0.5rem;
-  padding-right: 8px;
-`;
-
-export const DeleteButton = styled.button`
-  background: none;
-  border: none;
-  color: #ff5252;
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  
-  &:hover {
-    color: #ff1744;
-    background-color: rgba(255, 82, 82, 0.1);
-    border-radius: 4px;
-  }
-&:focus {
-    outline: none;    
-  }
-  svg {
-    width: 14px;
-    height: 14px;
   }
 `;

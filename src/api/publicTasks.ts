@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { Task } from '../types/index';
 import moment from 'moment';
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { API_URL } from '../config/env';
 
 const publicAxios = axios.create({
   baseURL: `${API_URL}/api`,

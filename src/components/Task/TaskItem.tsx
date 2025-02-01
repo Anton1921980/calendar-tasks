@@ -42,14 +42,11 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 
   const handleStatusClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log('Current status:', status);
     const nextStatus = {
       plan: 'progress',
       progress: 'done',
       done: 'plan',
-    }[status] as 'plan' | 'progress' | 'done';
-    
-    console.log('Next status:', nextStatus);
+    }[status] as 'plan' | 'progress' | 'done'; 
     onEdit(_id, text, nextStatus);
   };
 
