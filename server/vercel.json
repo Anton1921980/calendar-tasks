@@ -12,5 +12,8 @@
       "dest": "src/app.ts"
     }
   ],
-  "outputDirectory": "build"
+  "outputDirectory": "build",
+  "env": {
+    "CLIENT_URL": "https://calendar-tasks-cli.vercel.app"
+  }
 }
