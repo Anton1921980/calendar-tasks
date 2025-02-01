@@ -1,10 +1,10 @@
-import React, { useState, memo } from "react";
-import moment from "moment";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "@/store";
-import { setSelectedDate } from "@/store/slices/calendarSlice";
-import { moveTask } from "@/store/slices/tasksSlice";
-import { getCalendarDays, getWeekDays } from "@/utils/dateUtils";
+import React, { useState, memo } from 'react';
+import moment from 'moment';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../../store';
+import { setSelectedDate } from '../../store/slices/calendarSlice';
+import { moveTask } from '../../store/slices/tasksSlice';
+import { getCalendarDays, getWeekDays } from '../../utils/dateUtils';
 import {
   WeekDaysGrid,
   WeekDay,
@@ -15,10 +15,10 @@ import {
   HolidayText,
   HolidaysWrapper,
   TaskCount,
-} from "./styles";
-import { TaskList } from "../Task/TaskList";
-import { LoadingSpinner } from "../shared/LoadingSpinner";
-import useHolidays from "../../hooks/useHolidays";
+} from './styles';
+import { TaskList } from '../Task/TaskList';
+import { LoadingSpinner } from '../shared/LoadingSpinner';
+import useHolidays from '../../hooks/useHolidays';
 
 const WEEKDAYS = [
   "Sunday",

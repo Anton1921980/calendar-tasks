@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Task, createTask, updateTaskThunk, deleteTaskThunk } from "@/store/slices/tasksSlice";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { Task, createTask, updateTaskThunk, deleteTaskThunk } from '../../store/slices/tasksSlice';
 import { TaskItem } from "./TaskItem";
-import { RootState } from "@/store";
+import { RootState } from '../../store';
 import { TaskListContainer, TaskItemWrapper, AddTaskInput } from "./styles";
 
 interface TaskListProps {
